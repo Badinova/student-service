@@ -2,13 +2,14 @@ package ait.cohort55.student.dao;
 
 import ait.cohort55.student.model.Student;
 import org.springframework.stereotype.Component;
+import org.springframework.stereotype.Repository;
 
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.ConcurrentHashMap;
 
-@Component
+@Repository
 public class StudentRepositoryImpl implements StudentRepository {
     private Map<Long, Student> students = new ConcurrentHashMap<>();
 

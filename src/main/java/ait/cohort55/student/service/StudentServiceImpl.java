@@ -7,17 +7,20 @@ import ait.cohort55.student.dto.StudentDto;
 import ait.cohort55.student.dto.StudentUpdateDto;
 import ait.cohort55.student.dto.exeptions.StudentNotFoundException;
 import ait.cohort55.student.model.Student;
+import lombok.AllArgsConstructor;
+import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
+import org.springframework.stereotype.Service;
 
 import java.util.List;
 import java.util.Set;
 import java.util.stream.StreamSupport;
 
-@Component
+@Service
+@RequiredArgsConstructor
 public class StudentServiceImpl implements StudentService{
-    @Autowired
-    private StudentRepository studentRepository;
+    private final StudentRepository studentRepository;
 
     @Override
     public Boolean addStudent(StudentAddDto studentAddDto) {
@@ -58,15 +61,13 @@ public class StudentServiceImpl implements StudentService{
     @Override
     public Boolean addScore(Long id, ScoreDto scoreDto) {
         Student student = studentRepository.findById(id).orElseThrow(StudentNotFoundException::new);
-        student.getScores().put(scoreDto.getExamName(), scoreDto.getScore());
-        studentRepository.save(student);
-        return true;
+        return student.addScore(scoreDto.getExamName(), scoreDto.getScore());
     }
 
     @Override
     public List<StudentDto> findStudentsByName(String name) {
         return StreamSupport.stream(studentRepository.findAll().spliterator(), false)
-                .filter(student -> student.getName().equalsIgnoreCase(name))
+                .filter(student -> student.getName().equalsIgnoreCase(student.getName()))
                 .map(student -> new StudentDto(student.getId(), student.getName(), student.getScores()))
                 .toList();
     }
@@ -81,10 +82,8 @@ public class StudentServiceImpl implements StudentService{
     @Override
     public List<StudentDto> findStudentsByExamNameMinScore(String exam, Integer minScore) {
         return StreamSupport.stream(studentRepository.findAll().spliterator(), false)
-                .filter(student -> {Integer score = student.getScores().get(exam);
-                return score != null && score >= minScore;
-                })
-                .map(student -> new StudentDto(student.getId(), student.getName(), student.getScores()))
+                .filter(s -> s.getScores().containsKey(exam) && s.getScores().get(exam) > minScore)
+                .map(s -> new StudentDto(s.getId(), s.getName(), s.getScores()))
                 .toList();
     }
 }
