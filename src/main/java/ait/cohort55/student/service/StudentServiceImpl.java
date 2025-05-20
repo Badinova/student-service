@@ -9,6 +9,7 @@ import ait.cohort55.student.dto.exeptions.StudentNotFoundException;
 import ait.cohort55.student.model.Student;
 import lombok.AllArgsConstructor;
 import lombok.RequiredArgsConstructor;
+import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.stereotype.Service;
@@ -21,13 +22,15 @@ import java.util.stream.StreamSupport;
 @RequiredArgsConstructor
 public class StudentServiceImpl implements StudentService{
     private final StudentRepository studentRepository;
+    private final ModelMapper modelMapper;
 
     @Override
     public Boolean addStudent(StudentAddDto studentAddDto) {
         if (studentRepository.existsById(studentAddDto.getId())) {
             return false;
         }
-        Student student = new Student(studentAddDto.getId(), studentAddDto.getName(), studentAddDto.getPassword());
+        //Student student = new Student(studentAddDto.getId(), studentAddDto.getName(), studentAddDto.getPassword());
+        Student student = modelMapper.map(studentAddDto, Student.class);
         studentRepository.save(student);
         return true;
     }
@@ -35,7 +38,7 @@ public class StudentServiceImpl implements StudentService{
     @Override
     public StudentDto findStudent(Long id) {
         Student student = studentRepository.findById(id).orElseThrow(StudentNotFoundException::new);
-        return new StudentDto(student.getId(), student.getName(), student.getScores());
+        return modelMapper.map(student, StudentDto.class);
     }
 
     @Override
@@ -75,7 +78,7 @@ public class StudentServiceImpl implements StudentService{
 
     @Override
     public Long getStudentsQuantityByNames(Set<String> names) {
-        return studentRepository.findByNameIn(names).count();
+        return studentRepository.countByNameIn(names);
     }
 
     @Override
