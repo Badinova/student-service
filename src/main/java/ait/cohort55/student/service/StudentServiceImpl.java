@@ -45,7 +45,7 @@ public class StudentServiceImpl implements StudentService{
     public StudentDto removeStudent(Long id) {
         Student student = studentRepository.findById(id).orElseThrow(StudentNotFoundException::new);
         studentRepository.deleteById(id);
-        return new StudentDto(student.getId(), student.getName(), student.getScores());
+        return modelMapper.map(student, StudentDto.class);
     }
 
     @Override
@@ -58,7 +58,7 @@ public class StudentServiceImpl implements StudentService{
             student.setPassword(studentUpdateDto.getPassword());
         }
         studentRepository.save(student);
-        return new StudentAddDto(student.getId(), student.getName(), student.getPassword());
+        return modelMapper.map(student, StudentAddDto.class);
     }
 
     @Override
@@ -72,7 +72,7 @@ public class StudentServiceImpl implements StudentService{
     @Override
     public List<StudentDto> findStudentsByName(String name) {
         return studentRepository.findByNameIgnoreCase(name)
-                .map(student -> new StudentDto(student.getId(), student.getName(), student.getScores()))
+                .map(student -> modelMapper.map(student, StudentDto.class))
                 .toList();
     }
 
@@ -84,7 +84,7 @@ public class StudentServiceImpl implements StudentService{
     @Override
     public List<StudentDto> findStudentsByExamNameMinScore(String exam, Integer minScore) {
         return studentRepository.findByExamScoreGreaterThan(exam, minScore).stream()
-                .map(s -> new StudentDto(s.getId(), s.getName(), s.getScores()))
+                .map(s -> modelMapper.map(s, StudentDto.class))
                 .toList();
     }
 }
